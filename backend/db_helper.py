@@ -1,7 +1,7 @@
 import os
 import sys
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 from contextlib import contextmanager
 import calendar
 import mysql.connector
@@ -28,18 +28,22 @@ def get_db_connection():
     database_url = os.environ.get("DATABASE_URL")
     
     if database_url:
+        database_url = database_url.strip("'\" \t\r\n")
         parsed = urlparse(database_url)
         host = parsed.hostname or "localhost"
         port = parsed.port or 3306
-        user = parsed.username or "root"
-        password = parsed.password or ""
-        dbname = parsed.path.lstrip("/") or "expense_manager"
+        user = unquote(parsed.username) if parsed.username else "root"
+        password = unquote(parsed.password) if parsed.password else ""
+        dbname = parsed.path.lstrip("/").split("?")[0] or "expense_manager"
     else:
-        host = os.environ.get("DB_HOST", "localhost")
-        port = int(os.environ.get("DB_PORT", 3306))
-        user = os.environ.get("DB_USER", "root")
-        password = os.environ.get("DB_PASSWORD", "root")
-        dbname = os.environ.get("DB_NAME", "expense_manager")
+        host = os.environ.get("DB_HOST", "localhost").strip("'\" \t\r\n")
+        port_raw = str(os.environ.get("DB_PORT", 3306)).strip("'\" \t\r\n")
+        port = int(port_raw) if port_raw.isdigit() else 3306
+        user = os.environ.get("DB_USER", "root").strip("'\" \t\r\n")
+        password = os.environ.get("DB_PASSWORD", "root").strip("'\" \t\r\n")
+        dbname = os.environ.get("DB_NAME", "test").strip("'\" \t\r\n")
+
+    logger.info(f"Connecting to database at {host}:{port} with user '{user}', db '{dbname}'")
 
     conn_args = {
         "host": host,
@@ -55,7 +59,7 @@ def get_db_connection():
 
     if not ssl_disabled and host not in ("localhost", "127.0.0.1", "backend", "db"):
         if ssl_ca:
-            conn_args["ssl_ca"] = ssl_ca
+            conn_args["ssl_ca"] = ssl_ca.strip("'\" \t\r\n")
         else:
             try:
                 import certifi
