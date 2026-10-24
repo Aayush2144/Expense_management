@@ -87,13 +87,13 @@ export const TiltCard: React.FC<TiltCardProps> = ({
         }}
         className="relative w-full h-full rounded-2xl p-[1.5px] overflow-hidden shadow-xl hover:shadow-[0_0_35px_rgba(139,92,246,0.25)] transition-shadow duration-300"
       >
-        {/* Animated Moving Border Glow */}
+        {/* Animated Moving Border Glow (Underneath border only) */}
         {enableGlow && <GlowingEffect variant="rainbow" movementDuration={5} {...glowProps} />}
 
-        {/* Card Body */}
+        {/* 100% Solid Opaque Card Interior: Blocks any light from shining inside the box */}
         <div
           className={cn(
-            "relative z-10 w-full h-full rounded-[14px] bg-card/90 backdrop-blur-2xl text-card-foreground overflow-hidden",
+            "relative z-10 w-full h-full rounded-[14px] bg-[#0A0D14] dark:bg-[#0A0D14] text-card-foreground overflow-hidden",
             className
           )}
           {...props}

@@ -70,7 +70,7 @@ export const QuickStatsBento: React.FC<{ onOpenAddModal: () => void }> = ({
       {/* 3D Interactive Hero Card (Spans 8 columns on desktop) */}
       <div className="col-span-1 md:col-span-8 w-full min-h-[320px]">
         <TiltCard
-          className="p-6 flex flex-col justify-between h-full bg-gradient-to-br from-card/90 via-card/60 to-primary/10 border-primary/25"
+          className="p-6 flex flex-col justify-between h-full bg-[#0A0D14]"
           maxTilt={5}
         >
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center h-full">

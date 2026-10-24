@@ -63,7 +63,7 @@ export const DialogContent: React.FC<
       {/* Modal Dialog */}
       <div
         className={cn(
-          "relative z-50 w-full max-w-lg rounded-2xl border border-border/60 bg-card/90 p-6 shadow-2xl backdrop-blur-2xl transition-all duration-300 animate-in fade-in zoom-in-95",
+          "relative z-50 w-full max-w-lg rounded-2xl border border-border/60 bg-[#0A0D14] p-6 shadow-2xl transition-all duration-300 animate-in fade-in zoom-in-95",
           className
         )}
         {...props}

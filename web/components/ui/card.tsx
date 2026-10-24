@@ -14,8 +14,9 @@ const Card = React.forwardRef<
     )}
   >
     {glow && <GlowingEffect variant="rainbow" movementDuration={6} />}
+    {/* 100% Solid Opaque Background: Prevents light from bleeding into the card interior */}
     <div
-      className="relative z-10 w-full h-full rounded-[14px] bg-card/90 backdrop-blur-2xl text-card-foreground overflow-hidden"
+      className="relative z-10 w-full h-full rounded-[14px] bg-[#0A0D14] dark:bg-[#0A0D14] text-card-foreground overflow-hidden"
       {...props}
     >
       {children}

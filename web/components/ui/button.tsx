@@ -64,8 +64,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                 "conic-gradient(from 0deg, transparent 0deg 160deg, #00F0FF 240deg, #8B5CF6 290deg, #EC4899 330deg, #00F0FF 360deg)",
             }}
           />
-          {/* Inner Button Content */}
-          <span className="relative z-10 inline-flex items-center justify-center px-4 py-2 rounded-full bg-card/90 text-foreground text-xs font-semibold backdrop-blur-md w-full h-full group-hover:bg-card/70 transition-colors">
+          {/* 100% Solid Opaque Button Body: Light stays strictly on the perimeter */}
+          <span className="relative z-10 inline-flex items-center justify-center px-4 py-2 rounded-full bg-[#0A0D14] dark:bg-[#0A0D14] text-foreground text-xs font-semibold w-full h-full group-hover:bg-[#141926] transition-colors">
             {children}
           </span>
         </button>
