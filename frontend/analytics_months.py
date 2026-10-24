@@ -1,31 +1,43 @@
+import os
 import streamlit as st
 from datetime import datetime
 import requests
 import pandas as pd
 import altair as alt
 
-API_URL = "http://localhost:8000"
+API_URL = os.environ.get("API_URL", "http://localhost:8000").rstrip("/")
 
-# Month order for sorting
 MONTH_ORDER = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
 ]
 
+
 def analytics_months_tab():
     st.title("Monthly Expense Analytics")
 
-    # Year selection
     col1, col2 = st.columns(2)
     with col1:
-        year = st.selectbox("Select Year", [2023, 2024, 2025,2026], index=1)
+        year = st.selectbox("Select Year", [2023, 2024, 2025, 2026, 2027], index=1)
     with col2:
-        st.write("")  # placeholder
+        st.write("")
 
     if st.button("Get Monthly Analytics"):
         payload = {"year": year}
 
-        response = requests.post(f"{API_URL}/analytics/monthly/", json=payload).json()
+        try:
+            res = requests.post(f"{API_URL}/analytics/monthly/", json=payload, timeout=10)
+            if res.status_code != 200:
+                st.error(f"Backend returned error: {res.status_code}")
+                return
+            response = res.json()
+        except Exception as e:
+            st.error(f"Failed to connect to backend at {API_URL}: {e}")
+            return
+
+        if not response:
+            st.info(f"No monthly expense data found for year {year}.")
+            return
 
         # Convert API response to DataFrame
         data = {
@@ -60,7 +72,8 @@ def analytics_months_tab():
         st.altair_chart(chart, use_container_width=True)
 
         # Scrollable dataframe
-        df_sorted["Total"] = df_sorted["Total"].map("{:.2f}".format)
-        df_sorted["Percentage"] = df_sorted["Percentage"].map("{:.2f}".format)
+        df_display = df_sorted.copy()
+        df_display["Total"] = df_display["Total"].map("{:.2f}".format)
+        df_display["Percentage"] = df_display["Percentage"].map("{:.2f}%".format)
         st.subheader("Detailed Table")
-        st.dataframe(df_sorted, use_container_width=True)
+        st.dataframe(df_display, use_container_width=True)

@@ -1,8 +1,18 @@
+import os
+import sys
+from pathlib import Path
+
+# Ensure frontend directory is in sys.path
+sys.path.append(str(Path(__file__).parent))
+
 import streamlit as st
 from streamlit_option_menu import option_menu
 from add_update_ui import add_update_tab
 from analytics_ui import analytics_tab
 from analytics_months import analytics_months_tab
+
+st.set_page_config(page_title="Expense Tracking System", page_icon="📊", layout="wide")
+
 st.markdown("""
     <style>
     .stButton>button {
@@ -18,7 +28,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.markdown("# Expense Tracking System")
-
 
 # Nice horizontal menu
 selected = option_menu(

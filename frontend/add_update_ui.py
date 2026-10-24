@@ -1,18 +1,22 @@
+import os
 import streamlit as st
 from datetime import datetime
 import requests
 
-API_URL = "http://localhost:8000"
+API_URL = os.environ.get("API_URL", "http://localhost:8000").rstrip("/")
 
 
 def add_update_tab():
     selected_date = st.date_input("Enter Date", datetime(2024, 8, 1), label_visibility="collapsed")
-    response = requests.get(f"{API_URL}/expenses/{selected_date}")
-    if response.status_code == 200:
-        existing_expenses = response.json()
-        # st.write(existing_expenses)
-    else:
-        st.error("Failed to retrieve expenses")
+    try:
+        response = requests.get(f"{API_URL}/expenses/{selected_date}", timeout=10)
+        if response.status_code == 200:
+            existing_expenses = response.json()
+        else:
+            st.error("Failed to retrieve expenses from backend.")
+            existing_expenses = []
+    except Exception as e:
+        st.error(f"Cannot connect to backend at {API_URL}. Error: {e}")
         existing_expenses = []
 
     categories = ["Rent", "Food", "Shopping", "Entertainment", "Other"]
@@ -29,9 +33,9 @@ def add_update_tab():
         expenses = []
         for i in range(5):
             if i < len(existing_expenses):
-                amount = existing_expenses[i]['amount']
-                category = existing_expenses[i]["category"]
-                notes = existing_expenses[i]["notes"]
+                amount = float(existing_expenses[i].get('amount', 0.0))
+                category = existing_expenses[i].get("category", "Shopping")
+                notes = existing_expenses[i].get("notes") or ""
             else:
                 amount = 0.0
                 category = "Shopping"
@@ -39,13 +43,20 @@ def add_update_tab():
 
             col1, col2, col3 = st.columns(3)
             with col1:
-                amount_input = st.number_input(label="Amount", min_value=0.0, step=1.0, value=amount, key=f"amount_{i}",
-                                               label_visibility="collapsed")
+                amount_input = st.number_input(
+                    label="Amount", min_value=0.0, step=1.0, value=amount, key=f"amount_{i}",
+                    label_visibility="collapsed"
+                )
             with col2:
-                category_input = st.selectbox(label="Category", options=categories, index=categories.index(category),
-                                              key=f"category_{i}", label_visibility="collapsed")
+                cat_index = categories.index(category) if category in categories else 0
+                category_input = st.selectbox(
+                    label="Category", options=categories, index=cat_index,
+                    key=f"category_{i}", label_visibility="collapsed"
+                )
             with col3:
-                notes_input = st.text_input(label="Notes", value=notes, key=f"notes_{i}", label_visibility="collapsed")
+                notes_input = st.text_input(
+                    label="Notes", value=notes, key=f"notes_{i}", label_visibility="collapsed"
+                )
 
             expenses.append({
                 'amount': amount_input,
@@ -53,12 +64,15 @@ def add_update_tab():
                 'notes': notes_input
             })
 
-        submit_button = st.form_submit_button()
+        submit_button = st.form_submit_button("Save Expenses")
         if submit_button:
             filtered_expenses = [expense for expense in expenses if expense['amount'] > 0]
 
-            response = requests.post(f"{API_URL}/expenses/{selected_date}", json=filtered_expenses)
-            if response.status_code == 200:
-                st.success("Expenses updated successfully!")
-            else:
-                st.error("Failed to update expenses.")
+            try:
+                response = requests.post(f"{API_URL}/expenses/{selected_date}", json=filtered_expenses, timeout=10)
+                if response.status_code == 200:
+                    st.success("Expenses updated successfully!")
+                else:
+                    st.error("Failed to update expenses.")
+            except Exception as e:
+                st.error(f"Failed to connect to backend: {e}")
