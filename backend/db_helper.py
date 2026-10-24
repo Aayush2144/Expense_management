@@ -53,11 +53,18 @@ def get_db_connection():
     ssl_ca = os.environ.get("DB_SSL_CA")
     ssl_disabled = os.environ.get("DB_SSL_DISABLED", "false").lower() in ("true", "1")
 
-    if ssl_ca:
-        conn_args["ssl_ca"] = ssl_ca
-    elif not ssl_disabled and host not in ("localhost", "127.0.0.1", "backend", "db"):
-        # Most cloud-hosted MySQL databases require SSL
-        conn_args["ssl_disabled"] = False
+    if not ssl_disabled and host not in ("localhost", "127.0.0.1", "backend", "db"):
+        if ssl_ca:
+            conn_args["ssl_ca"] = ssl_ca
+        else:
+            try:
+                import certifi
+                conn_args["ssl_ca"] = certifi.where()
+            except ImportError:
+                if os.path.exists("/etc/ssl/certs/ca-certificates.crt"):
+                    conn_args["ssl_ca"] = "/etc/ssl/certs/ca-certificates.crt"
+                else:
+                    conn_args["ssl_disabled"] = False
 
     return mysql.connector.connect(**conn_args)
 
