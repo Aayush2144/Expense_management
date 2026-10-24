@@ -7,6 +7,7 @@ import { GlowingEffect, GlowingEffectProps } from "./glowing-effect";
 interface TiltCardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   className?: string;
+  containerClassName?: string;
   maxTilt?: number;
   enableTilt?: boolean;
   enableGlow?: boolean;
@@ -16,6 +17,7 @@ interface TiltCardProps extends React.HTMLAttributes<HTMLDivElement> {
 export const TiltCard: React.FC<TiltCardProps> = ({
   children,
   className,
+  containerClassName,
   maxTilt = 7,
   enableTilt = true,
   enableGlow = true,
@@ -44,11 +46,9 @@ export const TiltCard: React.FC<TiltCardProps> = ({
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
 
-    // Normalize between -1 and 1
     const xPct = (mouseX / width) * 2 - 1;
     const yPct = (mouseY / height) * 2 - 1;
 
-    // Calculate rotation angles
     const rotateX = -yPct * maxTilt;
     const rotateY = xPct * maxTilt;
 
@@ -67,7 +67,7 @@ export const TiltCard: React.FC<TiltCardProps> = ({
   return (
     <div
       style={{ perspective: 1000 }}
-      className="relative rounded-2xl group transition-all duration-300"
+      className={cn("relative rounded-2xl group transition-all duration-300 w-full h-full", containerClassName)}
     >
       <div
         ref={cardRef}
@@ -85,7 +85,7 @@ export const TiltCard: React.FC<TiltCardProps> = ({
             : "transform 0.5s cubic-bezier(0.23, 1, 0.32, 1)",
         }}
         className={cn(
-          "relative rounded-2xl bg-card/70 backdrop-blur-xl border border-border/50 text-card-foreground shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden",
+          "relative w-full h-full rounded-2xl bg-card/70 backdrop-blur-xl border border-border/50 text-card-foreground shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden",
           className
         )}
         {...props}
