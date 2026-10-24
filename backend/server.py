@@ -32,7 +32,7 @@ def startup_event():
     try:
         db_helper.init_db()
     except Exception as e:
-        print(f"Startup notice: Could not auto-initialize DB: {e}")
+        print(f"Startup notice: Database initialization error: {e}")
 
 
 class Expense(BaseModel):
@@ -55,6 +55,7 @@ def root():
     return {
         "status": "online",
         "service": "Expense Management API",
+        "database_engine": db_helper.get_engine(),
         "docs": "/docs"
     }
 
@@ -62,11 +63,11 @@ def root():
 @app.get("/health")
 def health():
     try:
-        with db_helper.get_db_cursor() as cursor:
-            cursor.execute("SELECT 1;")
-        return {"status": "healthy", "database": "connected"}
+        with db_helper.get_db_cursor() as (cursor, eng):
+            cursor.execute("SELECT 1")
+        return {"status": "healthy", "database_engine": eng}
     except Exception as e:
-        return {"status": "unhealthy", "database_error": str(e)}
+        return {"status": "unhealthy", "error": str(e)}
 
 
 @app.get("/expenses/{expense_date}", response_model=List[Expense])
