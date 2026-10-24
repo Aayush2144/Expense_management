@@ -9,13 +9,17 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "relative rounded-2xl border border-border/50 bg-card/60 backdrop-blur-xl text-card-foreground shadow-sm transition-all duration-300 hover:border-border/80",
+      "relative rounded-2xl p-[1.5px] overflow-hidden group shadow-lg hover:shadow-[0_0_35px_rgba(139,92,246,0.2)] transition-shadow duration-300 w-full",
       className
     )}
-    {...props}
   >
-    {glow && <GlowingEffect />}
-    <div className="relative z-10">{children}</div>
+    {glow && <GlowingEffect variant="rainbow" movementDuration={6} />}
+    <div
+      className="relative z-10 w-full h-full rounded-[14px] bg-card/90 backdrop-blur-2xl text-card-foreground overflow-hidden"
+      {...props}
+    >
+      {children}
+    </div>
   </div>
 ));
 Card.displayName = "Card";

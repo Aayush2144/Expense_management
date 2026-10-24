@@ -18,7 +18,7 @@ export const TiltCard: React.FC<TiltCardProps> = ({
   children,
   className,
   containerClassName,
-  maxTilt = 7,
+  maxTilt = 6,
   enableTilt = true,
   enableGlow = true,
   glowProps,
@@ -49,10 +49,7 @@ export const TiltCard: React.FC<TiltCardProps> = ({
     const xPct = (mouseX / width) * 2 - 1;
     const yPct = (mouseY / height) * 2 - 1;
 
-    const rotateX = -yPct * maxTilt;
-    const rotateY = xPct * maxTilt;
-
-    setTilt({ x: rotateX, y: rotateY });
+    setTilt({ x: -yPct * maxTilt, y: xPct * maxTilt });
   };
 
   const handleMouseEnter = () => {
@@ -67,8 +64,12 @@ export const TiltCard: React.FC<TiltCardProps> = ({
   return (
     <div
       style={{ perspective: 1000 }}
-      className={cn("relative rounded-2xl group transition-all duration-300 w-full h-full", containerClassName)}
+      className={cn(
+        "relative rounded-2xl group transition-all duration-300 w-full h-full",
+        containerClassName
+      )}
     >
+      {/* Tilt & Moving Glow Border Container */}
       <div
         ref={cardRef}
         onMouseMove={handleMouseMove}
@@ -84,14 +85,21 @@ export const TiltCard: React.FC<TiltCardProps> = ({
             ? "transform 0.1s ease-out"
             : "transform 0.5s cubic-bezier(0.23, 1, 0.32, 1)",
         }}
-        className={cn(
-          "relative w-full h-full rounded-2xl bg-card/70 backdrop-blur-xl border border-border/50 text-card-foreground shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden",
-          className
-        )}
-        {...props}
+        className="relative w-full h-full rounded-2xl p-[1.5px] overflow-hidden shadow-xl hover:shadow-[0_0_35px_rgba(139,92,246,0.25)] transition-shadow duration-300"
       >
-        {enableGlow && <GlowingEffect {...glowProps} />}
-        <div className="relative z-10 w-full h-full">{children}</div>
+        {/* Animated Moving Border Glow */}
+        {enableGlow && <GlowingEffect variant="rainbow" movementDuration={5} {...glowProps} />}
+
+        {/* Card Body */}
+        <div
+          className={cn(
+            "relative z-10 w-full h-full rounded-[14px] bg-card/90 backdrop-blur-2xl text-card-foreground overflow-hidden",
+            className
+          )}
+          {...props}
+        >
+          {children}
+        </div>
       </div>
     </div>
   );

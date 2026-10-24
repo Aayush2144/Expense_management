@@ -1,14 +1,12 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 export interface GlowingEffectProps {
   blur?: number;
-  inactiveZone?: number;
-  proximity?: number;
   spread?: number;
-  variant?: "default" | "white";
+  variant?: "default" | "rainbow" | "cyan" | "white";
   glow?: boolean;
   movementDuration?: number;
   borderWidth?: number;
@@ -17,115 +15,65 @@ export interface GlowingEffectProps {
 }
 
 export const GlowingEffect: React.FC<GlowingEffectProps> = ({
-  blur = 16,
-  inactiveZone = 0.6,
-  proximity = 60,
-  spread = 40,
-  variant = "default",
+  blur = 10,
+  variant = "rainbow",
   glow = true,
-  movementDuration = 2,
+  movementDuration = 4,
   borderWidth = 1.5,
   disabled = false,
   className,
 }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
-  const [opacity, setOpacity] = useState<number>(0);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
       setPrefersReducedMotion(mediaQuery.matches);
-
       const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
       mediaQuery.addEventListener("change", handler);
       return () => mediaQuery.removeEventListener("change", handler);
     }
   }, []);
 
-  useEffect(() => {
-    if (disabled || prefersReducedMotion) return;
+  if (disabled || prefersReducedMotion) return null;
 
-    const parent = containerRef.current?.parentElement;
-    if (!parent) return;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = parent.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-
-      // Distance check for proximity
-      const isNear =
-        x >= -proximity &&
-        x <= rect.width + proximity &&
-        y >= -proximity &&
-        y <= rect.height + proximity;
-
-      if (!isNear) {
-        setOpacity(0);
-        return;
-      }
-
-      setPosition({ x, y });
-      setOpacity(1);
-    };
-
-    const handleMouseLeave = () => {
-      setOpacity(0);
-    };
-
-    parent.addEventListener("mousemove", handleMouseMove);
-    parent.addEventListener("mouseleave", handleMouseLeave);
-
-    return () => {
-      parent.removeEventListener("mousemove", handleMouseMove);
-      parent.removeEventListener("mouseleave", handleMouseLeave);
-    };
-  }, [disabled, proximity, prefersReducedMotion]);
-
-  if (disabled) return null;
-
-  // Use CSS theme variables for colors
-  const gradientColors =
+  // Vibrant neon gradient spectrum matching user's design reference
+  const gradientSpectrum =
     variant === "white"
-      ? "rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.1), transparent"
-      : "hsl(var(--primary) / 0.8), hsl(var(--ring) / 0.6), transparent";
+      ? "conic-gradient(from 0deg, transparent 0deg 180deg, rgba(255,255,255,0.9) 270deg, transparent 360deg)"
+      : variant === "cyan"
+      ? "conic-gradient(from 0deg, transparent 0deg 140deg, #00F0FF 220deg, #3B82F6 280deg, #10B981 330deg, #00F0FF 360deg)"
+      : variant === "default"
+      ? "conic-gradient(from 0deg, transparent 0deg 140deg, hsl(var(--primary)) 220deg, #00F0FF 270deg, hsl(var(--ring)) 320deg, hsl(var(--primary)) 360deg)"
+      : "conic-gradient(from 0deg, transparent 0deg 140deg, #00F0FF 200deg, #3B82F6 235deg, #8B5CF6 270deg, #EC4899 300deg, #F59E0B 330deg, #10B981 350deg, #00F0FF 360deg)";
 
   return (
     <div
-      ref={containerRef}
       aria-hidden="true"
-      style={
-        {
-          "--blur": `${blur}px`,
-          "--spread": `${spread}px`,
-          "--border-width": `${borderWidth}px`,
-          "--movement-duration": prefersReducedMotion ? "0s" : `${movementDuration}s`,
-        } as React.CSSProperties
-      }
       className={cn(
-        "pointer-events-none absolute -inset-[1px] rounded-[inherit] overflow-hidden transition-opacity duration-300",
+        "pointer-events-none absolute -inset-[1.5px] rounded-[inherit] overflow-hidden z-0",
         className
       )}
     >
-      {/* Dynamic tracking radial/conic glow */}
-      {position && !prefersReducedMotion && (
+      {/* Rotating continuous moving light beam */}
+      <div
+        className="absolute inset-[-200%] animate-[spin_linear_infinite]"
+        style={{
+          background: gradientSpectrum,
+          animationDuration: `${movementDuration}s`,
+        }}
+      />
+
+      {/* Luminous ambient bloom glow */}
+      {glow && (
         <div
-          className="absolute inset-0 transition-opacity duration-300 ease-out"
+          className="absolute inset-[-200%] animate-[spin_linear_infinite] blur-md opacity-70"
           style={{
-            opacity: glow ? opacity : 0,
-            background: `radial-gradient(var(--spread) circle at ${position.x}px ${position.y}px, ${gradientColors})`,
-            filter: `blur(var(--blur))`,
+            background: gradientSpectrum,
+            animationDuration: `${movementDuration}s`,
           }}
         />
       )}
-
-      {/* Subtle border outline ring */}
-      <div
-        className="absolute inset-0 rounded-[inherit] border border-border/40 pointer-events-none"
-        style={{ borderWidth: "var(--border-width)" }}
-      />
     </div>
   );
 };

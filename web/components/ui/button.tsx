@@ -17,7 +17,7 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        glow: "bg-primary text-primary-foreground shadow-[0_0_20px_hsl(var(--primary)/0.5)] hover:shadow-[0_0_30px_hsl(var(--primary)/0.7)] hover:bg-primary/95",
+        glow: "",
       },
       size: {
         default: "h-10 px-4 py-2",
@@ -38,13 +38,48 @@ export interface ButtonProps
     VariantProps<typeof buttonVariants> {}
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, ...props }, ref) => {
+  ({ className, variant, size, children, ...props }, ref) => {
+    if (variant === "glow") {
+      return (
+        <button
+          ref={ref}
+          className={cn(
+            "relative inline-flex items-center justify-center p-[1.5px] rounded-full overflow-hidden group shadow-[0_0_20px_rgba(0,240,255,0.3)] hover:shadow-[0_0_30px_rgba(139,92,246,0.6)] active:scale-[0.98] transition-all cursor-pointer",
+            className
+          )}
+          {...props}
+        >
+          {/* Animated revolving neon border beam */}
+          <div
+            className="absolute inset-[-200%] animate-[spin_3s_linear_infinite]"
+            style={{
+              background:
+                "conic-gradient(from 0deg, transparent 0deg 160deg, #00F0FF 240deg, #8B5CF6 290deg, #EC4899 330deg, #00F0FF 360deg)",
+            }}
+          />
+          <div
+            className="absolute inset-[-200%] animate-[spin_3s_linear_infinite] blur-sm opacity-80"
+            style={{
+              background:
+                "conic-gradient(from 0deg, transparent 0deg 160deg, #00F0FF 240deg, #8B5CF6 290deg, #EC4899 330deg, #00F0FF 360deg)",
+            }}
+          />
+          {/* Inner Button Content */}
+          <span className="relative z-10 inline-flex items-center justify-center px-4 py-2 rounded-full bg-card/90 text-foreground text-xs font-semibold backdrop-blur-md w-full h-full group-hover:bg-card/70 transition-colors">
+            {children}
+          </span>
+        </button>
+      );
+    }
+
     return (
       <button
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         {...props}
-      />
+      >
+        {children}
+      </button>
     );
   }
 );
