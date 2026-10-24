@@ -1,5 +1,5 @@
 services:
-  # All-in-one unified service (Backend + Streamlit frontend in a single free Web Service)
+  # 1. FastAPI REST Backend Service (Hosts the database API on Render)
   - type: web
     name: expense-management
     env: python
@@ -12,10 +12,24 @@ services:
       - key: DB_HOST
         sync: false
       - key: DB_PORT
-        value: "3306"
+        value: "4000"
       - key: DB_USER
         sync: false
       - key: DB_PASSWORD
         sync: false
       - key: DB_NAME
-        value: expense_manager
+        value: test
+
+  # 2. Next.js 14+ 3D Spatial Frontend Service
+  - type: web
+    name: expense-vault-ui
+    env: node
+    rootDir: web
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    plan: free
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: NEXT_PUBLIC_API_URL
+        value: https://expense-management-0ik6.onrender.com
