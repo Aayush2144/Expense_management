@@ -13,7 +13,11 @@ def add_update_tab():
         if response.status_code == 200:
             existing_expenses = response.json()
         else:
-            st.error("Failed to retrieve expenses from backend.")
+            try:
+                err_detail = response.json().get("detail", response.text)
+            except Exception:
+                err_detail = response.text or f"Status {response.status_code}"
+            st.error(f"Backend error ({response.status_code}): {err_detail}")
             existing_expenses = []
     except Exception as e:
         st.error(f"Cannot connect to backend at {API_URL}. Error: {e}")
@@ -73,6 +77,10 @@ def add_update_tab():
                 if response.status_code == 200:
                     st.success("Expenses updated successfully!")
                 else:
-                    st.error("Failed to update expenses.")
+                    try:
+                        err_detail = response.json().get("detail", response.text)
+                    except Exception:
+                        err_detail = response.text or f"Status {response.status_code}"
+                    st.error(f"Failed to update expenses: {err_detail}")
             except Exception as e:
                 st.error(f"Failed to connect to backend: {e}")
