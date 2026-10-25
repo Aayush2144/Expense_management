@@ -3,25 +3,20 @@
 import React, { useState, useMemo } from "react";
 import {
   ResponsiveContainer,
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   Tooltip,
-  Cell,
   AreaChart,
   Area,
 } from "recharts";
-import { PieChart, Calendar, TrendingUp, Layers, Sparkles, Filter } from "lucide-react";
+import { PieChart, TrendingUp } from "lucide-react";
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { TiltCard } from "@/components/ui/tilt-card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { CategoryAnalytics } from "@/components/dashboard/CategoryAnalytics";
 import { useExpenseStore } from "@/lib/store";
-import { formatCurrency, getCategoryColor } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
@@ -76,13 +71,13 @@ export default function AnalyticsPage() {
   }, [monthlyData]);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-300">
+    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300">
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
-          <PieChart className="h-7 w-7 text-primary" /> Financial Analytics & Trends
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
+          <PieChart className="h-6 w-6 sm:h-7 sm:w-7 text-primary" /> Financial Analytics & Trends
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-xs sm:text-sm text-muted-foreground mt-1">
           Multi-dimensional analytics with category distributions and month-by-month trajectory.
         </p>
       </div>
@@ -92,10 +87,10 @@ export default function AnalyticsPage() {
 
       {/* Monthly Analytics Section (Streamlit parity: analytics_months.py) */}
       <Card className="w-full">
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <CardTitle className="text-xl font-bold flex items-center gap-2">
+              <CardTitle className="text-lg sm:text-xl font-bold flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-emerald-400" /> Monthly Trajectory ({selectedYear})
               </CardTitle>
               <p className="text-xs text-muted-foreground mt-0.5">
@@ -121,43 +116,43 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Quick Metrics Cards Row (Matching Streamlit metrics) */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4">
-            <TiltCard className="p-4 bg-muted/20" maxTilt={4}>
-              <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 pt-3 sm:pt-4">
+            <TiltCard className="p-3.5 sm:p-4 bg-muted/20" maxTilt={4}>
+              <span className="text-[10px] sm:text-xs uppercase tracking-wider text-muted-foreground font-semibold">
                 Total Year Spend
               </span>
-              <p className="text-2xl font-bold text-foreground mt-1">
+              <p className="text-xl sm:text-2xl font-bold text-foreground mt-1">
                 {formatCurrency(yearStats.total)}
               </p>
             </TiltCard>
 
-            <TiltCard className="p-4 bg-muted/20" maxTilt={4}>
-              <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+            <TiltCard className="p-3.5 sm:p-4 bg-muted/20" maxTilt={4}>
+              <span className="text-[10px] sm:text-xs uppercase tracking-wider text-muted-foreground font-semibold">
                 Peak Month Outflow
               </span>
-              <p className="text-2xl font-bold text-foreground mt-1 text-primary">
+              <p className="text-xl sm:text-2xl font-bold text-foreground mt-1 text-primary">
                 {formatCurrency(yearStats.max)}
               </p>
             </TiltCard>
 
-            <TiltCard className="p-4 bg-muted/20" maxTilt={4}>
-              <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+            <TiltCard className="p-3.5 sm:p-4 bg-muted/20" maxTilt={4}>
+              <span className="text-[10px] sm:text-xs uppercase tracking-wider text-muted-foreground font-semibold">
                 Monthly Average
               </span>
-              <p className="text-2xl font-bold text-foreground mt-1 text-emerald-400">
+              <p className="text-xl sm:text-2xl font-bold text-foreground mt-1 text-emerald-400">
                 {formatCurrency(yearStats.avg)}
               </p>
             </TiltCard>
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-6">
-          {/* Monthly Bar / Area Chart */}
-          <div className="w-full h-80 pt-2">
+        <CardContent className="p-4 sm:p-6 pt-0 sm:pt-2 space-y-6">
+          {/* Monthly Area Chart */}
+          <div className="w-full h-64 sm:h-80 pt-2">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={monthlyData}
-                margin={{ top: 10, right: 10, left: 10, bottom: 20 }}
+                margin={{ top: 10, right: 10, left: -20, bottom: 10 }}
               >
                 <defs>
                   <linearGradient id="monthGradient" x1="0" y1="0" x2="0" y2="1">
@@ -167,10 +162,16 @@ export default function AnalyticsPage() {
                 </defs>
                 <XAxis
                   dataKey="monthShort"
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                  stroke="#888888"
+                  fontSize={11}
+                  tickLine={false}
+                  axisLine={false}
                 />
                 <YAxis
-                  tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                  stroke="#888888"
+                  fontSize={10}
+                  tickLine={false}
+                  axisLine={false}
                   tickFormatter={(v) => `₹${v}`}
                 />
                 <Tooltip
@@ -178,11 +179,11 @@ export default function AnalyticsPage() {
                     if (!active || !payload?.length) return null;
                     const d = payload[0].payload;
                     return (
-                      <div className="rounded-xl border border-border bg-popover/95 p-3 shadow-xl backdrop-blur-md">
-                        <p className="text-xs font-semibold text-foreground">{d.month} {selectedYear}</p>
+                      <div className="rounded-xl border border-border bg-popover/95 p-2.5 sm:p-3 shadow-xl backdrop-blur-md">
+                        <p className="text-xs font-semibold text-foreground">{d.month}</p>
                         <p className="text-sm font-bold text-primary">{formatCurrency(d.total)}</p>
                         <p className="text-[11px] text-muted-foreground">
-                          {d.percentage.toFixed(1)}% of yearly spend • {d.count} records
+                          {d.percentage.toFixed(1)}% of annual spend ({d.count} txns)
                         </p>
                       </div>
                     );
@@ -198,32 +199,6 @@ export default function AnalyticsPage() {
                 />
               </AreaChart>
             </ResponsiveContainer>
-          </div>
-
-          {/* Detailed Monthly Data Table */}
-          <div className="border border-border/50 rounded-xl overflow-hidden">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-muted/40 border-b border-border/50 text-muted-foreground font-semibold">
-                <tr>
-                  <th className="p-3">Month</th>
-                  <th className="p-3">Transactions</th>
-                  <th className="p-3">Total Spend</th>
-                  <th className="p-3 text-right">Percentage</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/30">
-                {monthlyData.map((m) => (
-                  <tr key={m.month} className="hover:bg-muted/20 transition-colors">
-                    <td className="p-3 font-medium text-foreground">{m.month}</td>
-                    <td className="p-3 text-muted-foreground">{m.count}</td>
-                    <td className="p-3 font-bold text-foreground">{formatCurrency(m.total)}</td>
-                    <td className="p-3 text-right font-semibold text-primary">
-                      {m.percentage.toFixed(1)}%
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         </CardContent>
       </Card>

@@ -12,6 +12,7 @@ interface ExpenseStore {
   searchQuery: string;
   is3DEnabled: boolean;
   backendUrl: string;
+  isMobileMenuOpen: boolean;
 
   // Actions
   addExpense: (expense: Omit<Expense, "id">) => void;
@@ -30,6 +31,8 @@ interface ExpenseStore {
   setSearchQuery: (query: string) => void;
   toggle3D: () => void;
   setBackendUrl: (url: string) => void;
+  setMobileMenuOpen: (open: boolean) => void;
+  toggleMobileMenu: () => void;
   
   importExpenses: (imported: Expense[]) => void;
   resetToDemoData: () => void;
@@ -45,6 +48,7 @@ export const useExpenseStore = create<ExpenseStore>()(
       dateRange: { start: "2024-08-01", end: "2024-10-31" },
       searchQuery: "",
       is3DEnabled: true,
+      isMobileMenuOpen: false,
       backendUrl: process.env.NEXT_PUBLIC_API_URL || "https://expense-management-0ik6.onrender.com",
 
       addExpense: (expense) =>
@@ -131,6 +135,8 @@ export const useExpenseStore = create<ExpenseStore>()(
       setSearchQuery: (query) => set({ searchQuery: query }),
       toggle3D: () => set((state) => ({ is3DEnabled: !state.is3DEnabled })),
       setBackendUrl: (url) => set({ backendUrl: url }),
+      setMobileMenuOpen: (open) => set({ isMobileMenuOpen: open }),
+      toggleMobileMenu: () => set((state) => ({ isMobileMenuOpen: !state.isMobileMenuOpen })),
 
       importExpenses: (imported) =>
         set((state) => ({

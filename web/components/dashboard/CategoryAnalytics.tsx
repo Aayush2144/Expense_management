@@ -56,10 +56,10 @@ export const CategoryAnalytics: React.FC = () => {
 
   return (
     <Card className="w-full">
-      <CardHeader className="pb-2">
+      <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-2">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <CardTitle className="text-xl font-bold flex items-center gap-2">
+            <CardTitle className="text-lg sm:text-xl font-bold flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-primary" /> Category Outflow Breakdown
             </CardTitle>
             <p className="text-xs text-muted-foreground mt-0.5">
@@ -69,67 +69,81 @@ export const CategoryAnalytics: React.FC = () => {
 
           {/* 3D vs 2D Toggle Switch */}
           <div className="flex items-center gap-2">
+            <div className="flex rounded-lg bg-muted/30 p-1 border border-border/40">
+              <button
+                onClick={() => is3DEnabled || toggle3D()}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold transition-all ${
+                  is3DEnabled
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Box className="h-3.5 w-3.5" /> 3D Spatial
+              </button>
+              <button
+                onClick={() => !is3DEnabled || toggle3D()}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold transition-all ${
+                  !is3DEnabled
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <BarChart3 className="h-3.5 w-3.5" /> 2D Charts
+              </button>
+            </div>
+
             {!is3DEnabled && (
-              <div className="flex rounded-lg bg-muted/40 p-1">
+              <div className="flex rounded-lg bg-muted/30 p-1 border border-border/40">
                 <button
                   onClick={() => setChartMode2D("bar")}
-                  className={`p-1.5 rounded-md text-xs ${
-                    chartMode2D === "bar" ? "bg-primary text-primary-foreground shadow" : "text-muted-foreground"
+                  className={`p-1 rounded-md ${
+                    chartMode2D === "bar" ? "bg-muted text-foreground" : "text-muted-foreground"
                   }`}
                   title="Bar chart view"
                 >
-                  <BarChart3 className="h-4 w-4" />
+                  <BarChart3 className="h-3.5 w-3.5" />
                 </button>
                 <button
                   onClick={() => setChartMode2D("pie")}
-                  className={`p-1.5 rounded-md text-xs ${
-                    chartMode2D === "pie" ? "bg-primary text-primary-foreground shadow" : "text-muted-foreground"
+                  className={`p-1 rounded-md ${
+                    chartMode2D === "pie" ? "bg-muted text-foreground" : "text-muted-foreground"
                   }`}
-                  title="Donut chart view"
+                  title="Pie chart view"
                 >
-                  <PieIcon className="h-4 w-4" />
+                  <PieIcon className="h-3.5 w-3.5" />
                 </button>
               </div>
             )}
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={toggle3D}
-              className="h-8 gap-1.5 text-xs rounded-lg border-primary/30"
-            >
-              <Box className="h-3.5 w-3.5 text-primary" />
-              {is3DEnabled ? "Switch to 2D Charts" : "Switch to 3D Scene"}
-            </Button>
           </div>
         </div>
       </CardHeader>
 
-      <CardContent className="pt-2">
-        {categoryData.length === 0 ? (
-          <div className="h-72 flex items-center justify-center text-muted-foreground text-sm">
-            No expenses recorded yet.
-          </div>
-        ) : is3DEnabled ? (
-          /* 3D R3F View */
+      <CardContent className="p-4 sm:p-6 pt-2 sm:pt-4">
+        {/* Visual Chart Area */}
+        {is3DEnabled ? (
           <div className="w-full">
             <Category3DChart data={categoryData} />
           </div>
         ) : (
-          /* 2D Recharts View */
-          <div className="w-full h-80 pt-4">
+          <div className="w-full h-64 sm:h-72 pt-2">
             {chartMode2D === "bar" ? (
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={categoryData} margin={{ top: 10, right: 10, left: 10, bottom: 25 }}>
+                <BarChart
+                  data={categoryData}
+                  margin={{ top: 10, right: 10, left: -20, bottom: 5 }}
+                >
                   <XAxis
                     dataKey="category"
-                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
-                    interval={0}
-                    angle={-15}
-                    textAnchor="end"
+                    stroke="#888888"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
                   />
                   <YAxis
-                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11 }}
+                    stroke="#888888"
+                    fontSize={10}
+                    tickLine={false}
+                    axisLine={false}
                     tickFormatter={(v) => `₹${v}`}
                   />
                   <Tooltip
@@ -137,19 +151,17 @@ export const CategoryAnalytics: React.FC = () => {
                       if (!active || !payload?.length) return null;
                       const d = payload[0].payload as CategoryBreakdown;
                       return (
-                        <div className="rounded-xl border border-border bg-popover/95 p-3 shadow-xl backdrop-blur-md">
+                        <div className="rounded-xl border border-border bg-popover/95 p-2.5 sm:p-3 shadow-xl backdrop-blur-md">
                           <p className="text-xs font-semibold text-foreground">{d.category}</p>
                           <p className="text-sm font-bold text-primary">{formatCurrency(d.total)}</p>
-                          <p className="text-[11px] text-muted-foreground">
-                            {d.percentage.toFixed(1)}% of total • {d.count} transactions
-                          </p>
+                          <p className="text-[11px] text-muted-foreground">{d.percentage.toFixed(1)}%</p>
                         </div>
                       );
                     }}
                   />
                   <Bar
                     dataKey="total"
-                    radius={[8, 8, 0, 0]}
+                    radius={[6, 6, 0, 0]}
                     onClick={(data) => {
                       if (data?.category) {
                         setSelectedCategory(selectedCategory === data.category ? null : data.category);
@@ -175,7 +187,7 @@ export const CategoryAnalytics: React.FC = () => {
                       if (!active || !payload?.length) return null;
                       const d = payload[0].payload as CategoryBreakdown;
                       return (
-                        <div className="rounded-xl border border-border bg-popover/95 p-3 shadow-xl backdrop-blur-md">
+                        <div className="rounded-xl border border-border bg-popover/95 p-2.5 sm:p-3 shadow-xl backdrop-blur-md">
                           <p className="text-xs font-semibold text-foreground">{d.category}</p>
                           <p className="text-sm font-bold text-primary">{formatCurrency(d.total)}</p>
                           <p className="text-[11px] text-muted-foreground">{d.percentage.toFixed(1)}%</p>
@@ -189,8 +201,8 @@ export const CategoryAnalytics: React.FC = () => {
                     nameKey="category"
                     cx="50%"
                     cy="50%"
-                    innerRadius={65}
-                    outerRadius={105}
+                    innerRadius={55}
+                    outerRadius={95}
                     paddingAngle={4}
                     onClick={(data) => {
                       if (data?.category) {

@@ -79,7 +79,7 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
         notes: values.notes || "",
       });
 
-      // Best effort backend sync
+      // Optimistically push to live backend
       api.saveExpensesForDate(values.expense_date, [
         {
           expense_date: values.expense_date,
@@ -87,32 +87,34 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
           category: values.category,
           notes: values.notes || "",
         },
-      ]).catch(() => {});
+      ]).catch(() => {
+        // Handled silently by adapter
+      });
 
-      // Celebration
       confetti({
-        particleCount: 50,
+        particleCount: 60,
         spread: 60,
-        origin: { y: 0.7 },
+        origin: { y: 0.6 },
       });
 
-      toast.success("Expense recorded successfully!", {
-        description: `${values.category} • ₹${values.amount.toFixed(2)} on ${values.expense_date}`,
-      });
-
+      toast.success("Expense recorded successfully!");
       reset();
       onOpenChange(false);
     } catch {
-      toast.error("Failed to add expense");
+      toast.error("Failed to record expense");
     }
   };
 
   const onBatchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const validRows = batchRows.filter((r) => Number(r.amount) > 0);
+
+    const validRows = batchRows.filter((r) => {
+      const amt = parseFloat(r.amount);
+      return !isNaN(amt) && amt > 0;
+    });
 
     if (validRows.length === 0) {
-      toast.error("Please enter at least one valid amount > 0");
+      toast.error("Please enter at least one row with an amount greater than 0");
       return;
     }
 
@@ -145,20 +147,20 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl">
+      <DialogContent className="w-[95vw] sm:max-w-xl max-h-[88vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
           <div className="flex items-center justify-between">
-            <DialogTitle className="flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <Sparkles className="h-5 w-5 text-primary" /> Record New Expenses
             </DialogTitle>
           </div>
-          <DialogDescription>
+          <DialogDescription className="text-xs">
             Add a single transaction or use the 5-row batch entry grid (Streamlit parity).
           </DialogDescription>
         </DialogHeader>
 
         {/* Tab Switcher */}
-        <div className="flex rounded-lg bg-muted/40 p-1 mb-5">
+        <div className="flex rounded-lg bg-muted/40 p-1 mb-4">
           <button
             type="button"
             onClick={() => setTab("single")}
@@ -185,8 +187,8 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
 
         {tab === "single" ? (
           /* Single Entry Form */
-          <form onSubmit={handleSubmit(onSingleSubmit)} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <form onSubmit={handleSubmit(onSingleSubmit)} className="space-y-3.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {/* Date */}
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-foreground flex items-center gap-1.5">
@@ -255,7 +257,7 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
           </form>
         ) : (
           /* Streamlit 5-Row Batch Form */
-          <form onSubmit={onBatchSubmit} className="space-y-4">
+          <form onSubmit={onBatchSubmit} className="space-y-3.5">
             <div className="space-y-1.5 max-w-xs">
               <label className="text-xs font-medium text-foreground flex items-center gap-1.5">
                 <Calendar className="h-3.5 w-3.5 text-muted-foreground" /> Date for All 5 Rows
@@ -267,13 +269,14 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
               />
             </div>
 
-            <div className="space-y-2.5 max-h-64 overflow-y-auto pr-1">
+            <div className="space-y-2 max-h-60 sm:max-h-72 overflow-y-auto pr-1">
               {batchRows.map((row, idx) => (
                 <div
                   key={idx}
-                  className="grid grid-cols-12 gap-2 p-2.5 rounded-xl border border-border/40 bg-muted/20 items-center"
+                  className="grid grid-cols-12 gap-2 p-2 sm:p-2.5 rounded-xl border border-border/40 bg-muted/20 items-center"
                 >
-                  <div className="col-span-3">
+                  {/* Amount (Half width on mobile, 3 cols on desktop) */}
+                  <div className="col-span-5 sm:col-span-3">
                     <Input
                       type="number"
                       step="1"
@@ -284,7 +287,8 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
                       className="h-8 text-xs"
                     />
                   </div>
-                  <div className="col-span-4">
+                  {/* Category (Half width on mobile, 4 cols on desktop) */}
+                  <div className="col-span-7 sm:col-span-4">
                     <Select
                       value={row.category}
                       onChange={(e) => updateBatchRow(idx, "category", e.target.value)}
@@ -297,7 +301,8 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
                       ))}
                     </Select>
                   </div>
-                  <div className="col-span-5">
+                  {/* Notes (Full width on mobile, 5 cols on desktop) */}
+                  <div className="col-span-12 sm:col-span-5">
                     <Input
                       placeholder="Notes (optional)"
                       value={row.notes}
@@ -309,16 +314,16 @@ export const AddExpenseModal: React.FC<AddExpenseModalProps> = ({
               ))}
             </div>
 
-            <div className="pt-2 flex items-center justify-between">
+            <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
               <span className="text-[11px] text-muted-foreground">
                 Rows with amount = 0 will be skipped.
               </span>
-              <div className="flex gap-2">
+              <div className="flex gap-2 w-full sm:w-auto justify-end">
                 <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                   Cancel
                 </Button>
                 <Button type="submit" variant="glow">
-                  Save All Valid Rows
+                  Save All
                 </Button>
               </div>
             </div>

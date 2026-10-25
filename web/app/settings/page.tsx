@@ -68,123 +68,87 @@ export default function SettingsPage() {
       });
     } else {
       toast.error("Could not reach backend at specified URL", {
-        description: "Verify your server is live and CORS is enabled.",
+        description: "Verify that the backend is online and CORS is enabled.",
       });
     }
   };
 
-  const handleReset = () => {
-    if (confirm("Reset all expenses and categories back to sample demo data?")) {
-      resetToDemoData();
-      toast.success("Demo dataset restored!");
-    }
-  };
-
   return (
-    <div className="space-y-6 max-w-4xl animate-in fade-in duration-300">
+    <div className="space-y-6 sm:space-y-8 max-w-4xl animate-in fade-in duration-300">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
-          <Settings className="h-7 w-7 text-primary" /> Application Settings
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
+          <Settings className="h-6 w-6 sm:h-7 sm:w-7 text-primary" /> Application Settings
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Customize spending categories, connect remote backend APIs, or reset state.
+        <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+          Customize expense categories, connect live backend APIs, or reset local storage demo state.
         </p>
       </div>
 
-      {/* Backend API Configuration */}
+      {/* Category Management Card */}
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg font-bold flex items-center gap-2">
-            <Server className="h-5 w-5 text-primary" /> Remote Backend Adapter
+        <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-3">
+          <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+            <Tag className="h-4 w-4 text-primary" /> Manage Categories
           </CardTitle>
           <p className="text-xs text-muted-foreground">
-            Configure the URL of your FastAPI backend service (Render or localhost).
+            Add custom categories or rename/delete existing ones.
           </p>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Input
-              value={customUrl}
-              onChange={(e) => setCustomUrl(e.target.value)}
-              placeholder="https://expense-management-0ik6.onrender.com"
-              className="flex-1"
-            />
-            <Button
-              variant="glow"
-              onClick={handleTestBackend}
-              disabled={testingConnection}
-              className="shrink-0"
-            >
-              {testingConnection ? "Testing..." : "Save & Test Connection"}
-            </Button>
-          </div>
-          <div className="text-[11px] text-muted-foreground flex items-center gap-2">
-            <span>Live Render instance:</span>
-            <code className="bg-muted px-2 py-0.5 rounded text-foreground font-mono">
-              https://expense-management-0ik6.onrender.com
-            </code>
-          </div>
-        </CardContent>
-      </Card>
 
-      {/* Categories Management (Streamlit parity requirement) */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg font-bold flex items-center gap-2">
-            <Tag className="h-5 w-5 text-primary" /> Categories Management
-          </CardTitle>
-          <p className="text-xs text-muted-foreground">
-            Add new custom categories, rename existing ones, or remove unused categories.
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          {/* Add form */}
-          <form onSubmit={handleAddCategory} className="flex gap-2 max-w-md">
+        <CardContent className="p-4 sm:p-6 pt-2 space-y-4">
+          {/* Add Category Form */}
+          <form onSubmit={handleAddCategory} className="flex flex-col sm:flex-row gap-2 max-w-md">
             <Input
+              placeholder="New category name (e.g. Travel, Gym)..."
               value={newCatName}
               onChange={(e) => setNewCatName(e.target.value)}
-              placeholder="New category name (e.g. Healthcare, Travel)"
-              className="h-9 text-xs"
+              className="text-xs h-9"
             />
-            <Button type="submit" size="sm" variant="outline" className="gap-1 shrink-0">
-              <Plus className="h-3.5 w-3.5" /> Add
+            <Button type="submit" variant="glow" size="sm" className="h-9 gap-1.5 shrink-0">
+              <Plus className="h-4 w-4" /> Add Category
             </Button>
           </form>
 
-          {/* Categories List */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+          {/* Existing Categories List */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
             {categories.map((cat) => (
               <div
                 key={cat}
                 className="flex items-center justify-between p-3 rounded-xl border border-border/50 bg-muted/20 hover:border-border transition-colors"
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5">
                   <span
-                    className="w-2.5 h-2.5 rounded-full"
+                    className="w-3 h-3 rounded-full shrink-0"
                     style={{ backgroundColor: getCategoryColor(cat) }}
                   />
-                  <span className="text-xs font-semibold text-foreground">{cat}</span>
+                  <span className="font-semibold text-xs sm:text-sm text-foreground truncate">{cat}</span>
                 </div>
+
                 <div className="flex items-center gap-1">
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                    className="h-8 w-8 text-muted-foreground hover:text-foreground"
                     onClick={() => {
                       setEditingCat(cat);
                       setRenamedValue(cat);
                     }}
+                    title="Rename category"
                   >
-                    <Edit2 className="h-3 w-3" />
+                    <Edit2 className="h-3.5 w-3.5" />
                   </Button>
-                  {cat !== "Other" && (
+                  {categories.length > 1 && (
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                      onClick={() => deleteCategory(cat)}
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      onClick={() => {
+                        deleteCategory(cat);
+                        toast.success(`Removed category "${cat}"`);
+                      }}
+                      title="Delete category"
                     >
-                      <Trash2 className="h-3 w-3" />
+                      <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   )}
                 </div>
@@ -194,19 +158,68 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      {/* Demo Reset */}
-      <Card className="border-destructive/30">
-        <CardHeader>
-          <CardTitle className="text-lg font-bold flex items-center gap-2 text-destructive">
-            <RotateCcw className="h-5 w-5" /> Reset Local Data
+      {/* Backend API Connection Adapter */}
+      <Card>
+        <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-3">
+          <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+            <Server className="h-4 w-4 text-emerald-400" /> Backend API Adapter
           </CardTitle>
           <p className="text-xs text-muted-foreground">
-            Restore sample expenses and reset categories to their default seed states.
+            Connect to your deployed FastAPI backend or use local storage offline persistence.
           </p>
         </CardHeader>
-        <CardContent>
-          <Button variant="destructive" size="sm" onClick={handleReset} className="gap-1.5">
-            <RotateCcw className="h-3.5 w-3.5" /> Reset to Demo Data
+
+        <CardContent className="p-4 sm:p-6 pt-2 space-y-4">
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-foreground">
+              Backend Endpoint URL
+            </label>
+            <div className="flex flex-col sm:flex-row gap-2 max-w-lg">
+              <Input
+                value={customUrl}
+                onChange={(e) => setCustomUrl(e.target.value)}
+                placeholder="https://your-api.onrender.com"
+                className="text-xs h-9"
+              />
+              <Button
+                onClick={handleTestBackend}
+                disabled={testingConnection}
+                variant="outline"
+                size="sm"
+                className="h-9 shrink-0 gap-1.5 text-xs"
+              >
+                {testingConnection ? "Pinging..." : "Test Link"}
+              </Button>
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Default: <code className="text-primary font-mono text-[11px]">https://expense-management-0ik6.onrender.com</code>
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Reset State */}
+      <Card className="border-destructive/30 bg-destructive/5">
+        <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-3">
+          <CardTitle className="text-base sm:text-lg text-destructive flex items-center gap-2">
+            <RotateCcw className="h-4 w-4" /> Reset Seed Data
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">
+            Clear all localStorage changes and restore original Streamlit demo transactions.
+          </p>
+        </CardHeader>
+
+        <CardContent className="p-4 sm:p-6 pt-2">
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => {
+              resetToDemoData();
+              toast.success("Reset data to original seed demo values!");
+            }}
+            className="text-xs h-9"
+          >
+            Reset to Factory Defaults
           </Button>
         </CardContent>
       </Card>
@@ -214,19 +227,23 @@ export default function SettingsPage() {
       {/* Rename Dialog */}
       {editingCat && (
         <Dialog open={!!editingCat} onOpenChange={(open) => !open && setEditingCat(null)}>
-          <DialogContent>
+          <DialogContent className="w-[95vw] sm:max-w-md p-4 sm:p-6">
             <DialogHeader>
-              <DialogTitle>Rename Category</DialogTitle>
+              <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Edit2 className="h-4 w-4 text-primary" /> Rename Category "{editingCat}"
+              </DialogTitle>
             </DialogHeader>
-            <div className="py-2">
-              <label className="text-xs font-medium text-foreground">Category Name</label>
+
+            <div className="py-3 space-y-2">
+              <label className="text-xs font-medium text-foreground">New Category Name</label>
               <Input
                 value={renamedValue}
                 onChange={(e) => setRenamedValue(e.target.value)}
-                className="mt-1"
+                placeholder="Enter new name..."
               />
             </div>
-            <DialogFooter>
+
+            <DialogFooter className="gap-2 sm:gap-0">
               <Button variant="outline" onClick={() => setEditingCat(null)}>
                 Cancel
               </Button>

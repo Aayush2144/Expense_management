@@ -27,17 +27,25 @@ export const TiltCard: React.FC<TiltCardProps> = ({
   const cardRef = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [isMobileOrReduced, setIsMobileOrReduced] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-      setPrefersReducedMotion(media.matches);
+      const checkMobileOrReduced = () => {
+        const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const touch = window.matchMedia("(pointer: coarse)").matches;
+        const narrow = window.innerWidth < 768;
+        setIsMobileOrReduced(reduced || touch || narrow);
+      };
+
+      checkMobileOrReduced();
+      window.addEventListener("resize", checkMobileOrReduced);
+      return () => window.removeEventListener("resize", checkMobileOrReduced);
     }
   }, []);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!enableTilt || prefersReducedMotion || !cardRef.current) return;
+    if (!enableTilt || isMobileOrReduced || !cardRef.current) return;
 
     const rect = cardRef.current.getBoundingClientRect();
     const width = rect.width;
@@ -53,7 +61,7 @@ export const TiltCard: React.FC<TiltCardProps> = ({
   };
 
   const handleMouseEnter = () => {
-    if (!prefersReducedMotion && enableTilt) setIsHovered(true);
+    if (!isMobileOrReduced && enableTilt) setIsHovered(true);
   };
 
   const handleMouseLeave = () => {
@@ -77,7 +85,7 @@ export const TiltCard: React.FC<TiltCardProps> = ({
         onMouseLeave={handleMouseLeave}
         style={{
           transform:
-            isHovered && !prefersReducedMotion
+            isHovered && !isMobileOrReduced
               ? `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) translateY(-2px)`
               : "rotateX(0deg) rotateY(0deg) translateY(0px)",
           transformStyle: "preserve-3d",

@@ -63,17 +63,17 @@ export default function BudgetPage() {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
+    <div className="space-y-5 sm:space-y-6 animate-in fade-in duration-300">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
-          <Target className="h-7 w-7 text-primary" /> Monthly Budgets & Guardrails
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground flex items-center gap-2">
+          <Target className="h-6 w-6 sm:h-7 sm:w-7 text-primary" /> Monthly Budgets & Guardrails
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-xs sm:text-sm text-muted-foreground mt-1">
           Set monthly targets per category. Real-time visual meters warn you before overspending.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-5">
         {categories.map((category) => {
           const spent = categorySpendMap[category] || 0;
           const limit = budgets.find((b) => b.category === category)?.monthly_limit || 1000;
@@ -82,15 +82,15 @@ export default function BudgetPage() {
           const isNear = !isOver && pct >= 80;
 
           return (
-            <TiltCard key={category} className="p-5 flex flex-col justify-between" maxTilt={6}>
+            <TiltCard key={category} className="p-4 sm:p-5 flex flex-col justify-between" maxTilt={6}>
               <div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span
-                      className="w-3 h-3 rounded-full"
+                      className="w-3 h-3 rounded-full shrink-0"
                       style={{ backgroundColor: getCategoryColor(category) }}
                     />
-                    <h3 className="font-bold text-base text-foreground">{category}</h3>
+                    <h3 className="font-bold text-sm sm:text-base text-foreground truncate">{category}</h3>
                   </div>
                   <Button
                     variant="ghost"
@@ -102,21 +102,21 @@ export default function BudgetPage() {
                   </Button>
                 </div>
 
-                <div className="mt-4 flex items-baseline justify-between">
+                <div className="mt-3 sm:mt-4 flex items-baseline justify-between">
                   <div>
-                    <span className="text-xs text-muted-foreground">Current Spend</span>
-                    <p className="text-xl font-extrabold text-foreground">{formatCurrency(spent)}</p>
+                    <span className="text-[11px] text-muted-foreground">Current Spend</span>
+                    <p className="text-lg sm:text-xl font-extrabold text-foreground">{formatCurrency(spent)}</p>
                   </div>
                   <div className="text-right">
-                    <span className="text-xs text-muted-foreground">Budget Limit</span>
-                    <p className="text-sm font-semibold text-muted-foreground">
+                    <span className="text-[11px] text-muted-foreground">Budget Limit</span>
+                    <p className="text-xs sm:text-sm font-semibold text-muted-foreground">
                       {formatCurrency(limit)}
                     </p>
                   </div>
                 </div>
 
                 {/* Progress Meter */}
-                <div className="mt-4 space-y-1.5">
+                <div className="mt-3 sm:mt-4 space-y-1.5">
                   <div className="flex justify-between text-xs">
                     <span
                       className={`font-semibold ${
@@ -129,7 +129,7 @@ export default function BudgetPage() {
                     >
                       {pct}% Used
                     </span>
-                    <span className="text-muted-foreground text-[11px]">
+                    <span className="text-muted-foreground text-[10px] sm:text-[11px]">
                       {isOver
                         ? `Over by ${formatCurrency(spent - limit)}`
                         : `${formatCurrency(limit - spent)} remaining`}
@@ -141,30 +141,31 @@ export default function BudgetPage() {
                     max={limit}
                     indicatorClassName={
                       isOver
-                        ? "bg-destructive shadow-[0_0_12px_hsl(var(--destructive)/0.7)]"
+                        ? "bg-destructive shadow-[0_0_12px_hsl(var(--destructive)/0.6)]"
                         : isNear
                         ? "bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.6)]"
-                        : "bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.6)]"
+                        : "bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.6)]"
                     }
                   />
                 </div>
               </div>
 
               {/* Status footer pill */}
-              <div className="mt-4 pt-3 border-t border-border/40 flex items-center gap-1.5 text-xs">
+              <div className="mt-4 pt-3 border-t border-border/40 flex items-center justify-between text-xs">
                 {isOver ? (
-                  <span className="text-destructive flex items-center gap-1 font-semibold">
-                    <AlertTriangle className="h-3.5 w-3.5" /> Budget exceeded
+                  <span className="inline-flex items-center gap-1 text-destructive font-medium text-[11px]">
+                    <AlertTriangle className="h-3.5 w-3.5 shrink-0" /> Over budget
                   </span>
                 ) : isNear ? (
-                  <span className="text-amber-400 flex items-center gap-1 font-medium">
-                    <AlertTriangle className="h-3.5 w-3.5" /> Approaching monthly limit
+                  <span className="inline-flex items-center gap-1 text-amber-400 font-medium text-[11px]">
+                    <AlertTriangle className="h-3.5 w-3.5 shrink-0" /> Approaching limit
                   </span>
                 ) : (
-                  <span className="text-emerald-400 flex items-center gap-1 font-medium">
-                    <CheckCircle className="h-3.5 w-3.5" /> Well within healthy budget
+                  <span className="inline-flex items-center gap-1 text-emerald-400 font-medium text-[11px]">
+                    <CheckCircle className="h-3.5 w-3.5 shrink-0" /> Safe zone
                   </span>
                 )}
+                <span className="text-[11px] text-muted-foreground">Target: 30 days</span>
               </div>
             </TiltCard>
           );
@@ -174,28 +175,36 @@ export default function BudgetPage() {
       {/* Edit Budget Dialog */}
       {editingBudget && (
         <Dialog open={!!editingBudget} onOpenChange={(open) => !open && setEditingBudget(null)}>
-          <DialogContent>
+          <DialogContent className="w-[95vw] sm:max-w-md p-4 sm:p-6">
             <DialogHeader>
-              <DialogTitle>Set Budget for {editingBudget.category}</DialogTitle>
+              <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Target className="h-5 w-5 text-primary" /> Adjust {editingBudget.category} Budget
+              </DialogTitle>
             </DialogHeader>
 
-            <div className="space-y-3 py-2">
-              <label className="text-xs font-medium text-foreground">Monthly Limit (₹)</label>
+            <div className="py-4 space-y-3">
+              <label className="text-xs font-medium text-foreground">
+                Monthly Target Amount (₹)
+              </label>
               <Input
                 type="number"
-                min="0"
                 step="50"
+                min="0"
                 value={newLimit}
                 onChange={(e) => setNewLimit(e.target.value)}
+                placeholder="e.g. 1500"
               />
+              <p className="text-[11px] text-muted-foreground">
+                Sets maximum allowable spending for {editingBudget.category} each calendar month.
+              </p>
             </div>
 
-            <DialogFooter>
+            <DialogFooter className="gap-2 sm:gap-0">
               <Button variant="outline" onClick={() => setEditingBudget(null)}>
                 Cancel
               </Button>
               <Button variant="glow" onClick={handleSaveBudget}>
-                Save Budget
+                Save Target
               </Button>
             </DialogFooter>
           </DialogContent>

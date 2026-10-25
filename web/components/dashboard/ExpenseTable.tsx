@@ -3,7 +3,6 @@
 import React, { useState, useMemo } from "react";
 import {
   Search,
-  Filter,
   ArrowUpDown,
   Download,
   Upload,
@@ -11,7 +10,7 @@ import {
   Edit2,
   Calendar,
   Layers,
-  ChevronDown,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -223,10 +222,10 @@ export const ExpenseTable: React.FC = () => {
 
   return (
     <Card className="w-full">
-      <CardHeader className="pb-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <CardHeader className="p-4 sm:p-6 pb-3 sm:pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <CardTitle className="text-xl font-bold flex items-center gap-2">
+            <CardTitle className="text-lg sm:text-xl font-bold flex items-center gap-2">
               <Layers className="h-5 w-5 text-primary" /> Expense Records
             </CardTitle>
             <p className="text-xs text-muted-foreground mt-0.5">
@@ -242,7 +241,9 @@ export const ExpenseTable: React.FC = () => {
               onClick={exportToCSV}
               className="h-8 gap-1.5 text-xs rounded-lg"
             >
-              <Download className="h-3.5 w-3.5" /> Export CSV
+              <Download className="h-3.5 w-3.5" />
+              <span className="hidden xs:inline">Export CSV</span>
+              <span className="xs:hidden">Export</span>
             </Button>
 
             <label className="cursor-pointer">
@@ -253,14 +254,16 @@ export const ExpenseTable: React.FC = () => {
                 className="hidden"
               />
               <span className="inline-flex items-center justify-center h-8 px-3 rounded-lg border border-border/60 bg-background/50 hover:bg-accent text-xs font-medium transition-colors gap-1.5 backdrop-blur-sm">
-                <Upload className="h-3.5 w-3.5" /> Import CSV
+                <Upload className="h-3.5 w-3.5" />
+                <span className="hidden xs:inline">Import CSV</span>
+                <span className="xs:hidden">Import</span>
               </span>
             </label>
           </div>
         </div>
 
         {/* Filter Controls Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5 pt-3">
           {/* Search */}
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
@@ -314,36 +317,36 @@ export const ExpenseTable: React.FC = () => {
         {/* Active Filters Pill Bar */}
         {(selectedCategory || startDate || endDate || searchQuery) && (
           <div className="flex flex-wrap items-center gap-1.5 pt-2">
-            <span className="text-[11px] text-muted-foreground">Active filters:</span>
+            <span className="text-[11px] text-muted-foreground">Filters:</span>
             {selectedCategory && (
               <Badge variant="secondary" className="gap-1 text-[10px]">
-                Category: {selectedCategory}
+                {selectedCategory}
                 <button onClick={() => setSelectedCategory(null)} className="ml-1 hover:text-foreground">
-                  ×
+                  ✕
                 </button>
               </Badge>
             )}
             {searchQuery && (
               <Badge variant="secondary" className="gap-1 text-[10px]">
-                Search: {searchQuery}
+                "{searchQuery}"
                 <button onClick={() => setSearchQuery("")} className="ml-1 hover:text-foreground">
-                  ×
+                  ✕
                 </button>
               </Badge>
             )}
             {startDate && (
               <Badge variant="secondary" className="gap-1 text-[10px]">
-                From: {startDate}
+                From {startDate}
                 <button onClick={() => setStartDate("")} className="ml-1 hover:text-foreground">
-                  ×
+                  ✕
                 </button>
               </Badge>
             )}
             {endDate && (
               <Badge variant="secondary" className="gap-1 text-[10px]">
-                To: {endDate}
+                To {endDate}
                 <button onClick={() => setEndDate("")} className="ml-1 hover:text-foreground">
-                  ×
+                  ✕
                 </button>
               </Badge>
             )}
@@ -363,136 +366,205 @@ export const ExpenseTable: React.FC = () => {
       </CardHeader>
 
       <CardContent className="p-0">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead onClick={() => toggleSort("date")} className="cursor-pointer select-none">
-                <span className="inline-flex items-center gap-1">
-                  Date <ArrowUpDown className="h-3 w-3" />
-                </span>
-              </TableHead>
-              <TableHead onClick={() => toggleSort("category")} className="cursor-pointer select-none">
-                <span className="inline-flex items-center gap-1">
-                  Category <ArrowUpDown className="h-3 w-3" />
-                </span>
-              </TableHead>
-              <TableHead onClick={() => toggleSort("amount")} className="cursor-pointer select-none">
-                <span className="inline-flex items-center gap-1">
-                  Amount <ArrowUpDown className="h-3 w-3" />
-                </span>
-              </TableHead>
-              <TableHead>Notes</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-
-          <TableBody>
-            {filteredExpenses.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} className="h-32 text-center text-muted-foreground text-sm">
-                  No matching expenses found. Try clearing filters or recording a new expense!
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredExpenses.map((expense) => (
-                <TableRow key={expense.id} className="group">
-                  <TableCell className="font-medium text-xs whitespace-nowrap">
+        {/* ──────────────── Mobile Touch Cards View (< md) ──────────────── */}
+        <div className="block md:hidden px-3.5 pb-4 space-y-2.5">
+          {filteredExpenses.length === 0 ? (
+            <div className="py-12 text-center text-muted-foreground text-xs">
+              No matching expenses found.
+            </div>
+          ) : (
+            filteredExpenses.map((expense) => (
+              <div
+                key={expense.id}
+                className="p-3.5 rounded-xl border border-border/50 bg-muted/20 flex flex-col gap-2 transition-colors active:bg-muted/40"
+              >
+                {/* Header row: Date & Category Pill */}
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+                    <Calendar className="h-3 w-3 text-muted-foreground" />
                     {formatDate(expense.expense_date)}
-                  </TableCell>
-
-                  <TableCell>
+                  </span>
+                  <span
+                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold"
+                    style={{
+                      backgroundColor: `${getCategoryColor(expense.category)}20`,
+                      color: getCategoryColor(expense.category),
+                    }}
+                  >
                     <span
-                      className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold"
-                      style={{
-                        backgroundColor: `${getCategoryColor(expense.category)}20`,
-                        color: getCategoryColor(expense.category),
-                      }}
-                    >
-                      <span
-                        className="w-1.5 h-1.5 rounded-full"
-                        style={{ backgroundColor: getCategoryColor(expense.category) }}
-                      />
-                      {expense.category}
-                    </span>
-                  </TableCell>
+                      className="w-1.5 h-1.5 rounded-full"
+                      style={{ backgroundColor: getCategoryColor(expense.category) }}
+                    />
+                    {expense.category}
+                  </span>
+                </div>
 
-                  <TableCell className="font-bold text-foreground text-sm whitespace-nowrap">
+                {/* Amount & Notes */}
+                <div className="flex items-baseline justify-between pt-0.5">
+                  <div className="text-lg font-black text-foreground tracking-tight">
                     {formatCurrency(expense.amount)}
-                  </TableCell>
+                  </div>
+                  {expense.notes && (
+                    <span className="text-xs text-muted-foreground max-w-[180px] truncate">
+                      {expense.notes}
+                    </span>
+                  )}
+                </div>
 
-                  <TableCell className="text-muted-foreground text-xs max-w-xs truncate">
-                    {expense.notes || "—"}
-                  </TableCell>
+                {/* Actions row: Edit and Delete buttons */}
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-border/30">
+                  <button
+                    onClick={() => handleEditClick(expense)}
+                    className="h-8 px-3 rounded-lg border border-border/50 bg-background/60 text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-1"
+                  >
+                    <Edit2 className="h-3 w-3" /> Edit
+                  </button>
+                  <button
+                    onClick={() => {
+                      deleteExpense(expense.id);
+                      toast.success("Expense removed");
+                    }}
+                    className="h-8 px-3 rounded-lg border border-destructive/30 bg-destructive/10 text-xs font-medium text-destructive hover:bg-destructive/20 flex items-center gap-1"
+                  >
+                    <Trash2 className="h-3 w-3" /> Delete
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
 
-                  <TableCell className="text-right whitespace-nowrap">
-                    <div className="flex items-center justify-end gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                        onClick={() => handleEditClick(expense)}
-                        title="Edit expense"
-                      >
-                        <Edit2 className="h-3.5 w-3.5" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                        onClick={() => {
-                          deleteExpense(expense.id);
-                          toast.success("Expense removed");
-                        }}
-                        title="Delete expense"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
+        {/* ──────────────── Desktop Table View (>= md) ──────────────── */}
+        <div className="hidden md:block overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead onClick={() => toggleSort("date")} className="cursor-pointer select-none">
+                  <span className="inline-flex items-center gap-1">
+                    Date <ArrowUpDown className="h-3 w-3" />
+                  </span>
+                </TableHead>
+                <TableHead onClick={() => toggleSort("category")} className="cursor-pointer select-none">
+                  <span className="inline-flex items-center gap-1">
+                    Category <ArrowUpDown className="h-3 w-3" />
+                  </span>
+                </TableHead>
+                <TableHead onClick={() => toggleSort("amount")} className="cursor-pointer select-none">
+                  <span className="inline-flex items-center gap-1">
+                    Amount <ArrowUpDown className="h-3 w-3" />
+                  </span>
+                </TableHead>
+                <TableHead>Notes</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+
+            <TableBody>
+              {filteredExpenses.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="h-32 text-center text-muted-foreground text-sm">
+                    No matching expenses found. Try clearing filters or recording a new expense!
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              ) : (
+                filteredExpenses.map((expense) => (
+                  <TableRow key={expense.id} className="group">
+                    <TableCell className="font-medium text-xs whitespace-nowrap">
+                      {formatDate(expense.expense_date)}
+                    </TableCell>
+
+                    <TableCell>
+                      <span
+                        className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                        style={{
+                          backgroundColor: `${getCategoryColor(expense.category)}20`,
+                          color: getCategoryColor(expense.category),
+                        }}
+                      >
+                        <span
+                          className="w-1.5 h-1.5 rounded-full"
+                          style={{ backgroundColor: getCategoryColor(expense.category) }}
+                        />
+                        {expense.category}
+                      </span>
+                    </TableCell>
+
+                    <TableCell className="font-bold text-foreground text-sm whitespace-nowrap">
+                      {formatCurrency(expense.amount)}
+                    </TableCell>
+
+                    <TableCell className="text-muted-foreground text-xs max-w-xs truncate">
+                      {expense.notes || "—"}
+                    </TableCell>
+
+                    <TableCell className="text-right whitespace-nowrap">
+                      <div className="flex items-center justify-end gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                          onClick={() => handleEditClick(expense)}
+                          title="Edit expense"
+                        >
+                          <Edit2 className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          onClick={() => {
+                            deleteExpense(expense.id);
+                            toast.success("Expense removed");
+                          }}
+                          title="Delete expense"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
 
-      {/* Edit Expense Modal Dialog */}
+      {/* Edit Expense Dialog Modal */}
       {editingExpense && (
         <Dialog open={!!editingExpense} onOpenChange={(open) => !open && setEditingExpense(null)}>
-          <DialogContent>
+          <DialogContent className="w-[95vw] sm:max-w-md p-4 sm:p-6">
             <DialogHeader>
-              <DialogTitle>Edit Expense</DialogTitle>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit2 className="h-4 w-4 text-primary" /> Modify Expense Record
+              </DialogTitle>
             </DialogHeader>
 
-            <div className="space-y-4 pt-2">
-              <div>
+            <div className="space-y-4 py-2">
+              <div className="space-y-1.5">
                 <label className="text-xs font-medium text-foreground">Date</label>
                 <Input
                   type="date"
                   value={editDate}
                   onChange={(e) => setEditDate(e.target.value)}
-                  className="mt-1"
                 />
               </div>
 
-              <div>
-                <label className="text-xs font-medium text-foreground">Amount (₹)</label>
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-foreground">Amount</label>
                 <Input
                   type="number"
                   step="0.01"
-                  min="0"
                   value={editAmount}
                   onChange={(e) => setEditAmount(e.target.value)}
-                  className="mt-1"
                 />
               </div>
 
-              <div>
+              <div className="space-y-1.5">
                 <label className="text-xs font-medium text-foreground">Category</label>
                 <Select
                   value={editCategory}
                   onChange={(e) => setEditCategory(e.target.value)}
-                  className="mt-1"
                 >
                   {categories.map((c) => (
                     <option key={c} value={c}>
@@ -502,18 +574,16 @@ export const ExpenseTable: React.FC = () => {
                 </Select>
               </div>
 
-              <div>
+              <div className="space-y-1.5">
                 <label className="text-xs font-medium text-foreground">Notes</label>
                 <Input
                   value={editNotes}
                   onChange={(e) => setEditNotes(e.target.value)}
-                  placeholder="Notes"
-                  className="mt-1"
                 />
               </div>
             </div>
 
-            <DialogFooter>
+            <DialogFooter className="gap-2 sm:gap-0">
               <Button variant="outline" onClick={() => setEditingExpense(null)}>
                 Cancel
               </Button>
